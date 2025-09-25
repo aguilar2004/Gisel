@@ -83,25 +83,41 @@
   </footer>
 
   <!-- AUDIO -->
-  <audio id="musicaDeFondo" autoplay muted loop>
-    <source src="musica/musica.mp3" type="audio/mpeg">
-    Tu navegador no soporta audio.
-  </audio>
+<audio id="musicaDeFondo" autoplay muted loop>
+  <source src="musica/musica.mp3" type="audio/mpeg">
+  Tu navegador no soporta audio.
+</audio>
 
-  <script>
+ <script>
     const body = document.querySelector('body');
     const audio = document.getElementById('musicaDeFondo');
 
+    // Forzar la carga del audio en segundo plano
+    audio.load();
+
     const reproducirMusica = () => {
-      audio.muted = false; // quitar silencio
-      audio.play().catch(err => console.log("Error:", err));
+      // El método play() devuelve una "promesa"
+      const promise = audio.play();
+
+      if (promise !== undefined) {
+        promise.then(_ => {
+          // El audio comenzó a reproducirse correctamente.
+          audio.muted = false; // Quita el silencio DESPUÉS de que comience.
+        }).catch(error => {
+          // El autoplay no fue permitido por el navegador.
+          // Esto es normal, el usuario debe interactuar.
+          console.error("Error al reproducir:", error);
+        });
+      }
+      
+      // Eliminar los listeners para que no se ejecute de nuevo
       body.removeEventListener('click', reproducirMusica);
       body.removeEventListener('touchstart', reproducirMusica);
     };
 
-    // Escucha click y touch
+    // Escucha el primer toque o click del usuario
     body.addEventListener('click', reproducirMusica);
     body.addEventListener('touchstart', reproducirMusica);
-  </script>
+ </script>
 </body>
 </html>
